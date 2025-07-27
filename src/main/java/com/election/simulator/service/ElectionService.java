@@ -27,6 +27,36 @@ public class ElectionService {
         this.currentElection.setPoliticalParties(parties);
     }
 
+    public boolean castVote(String nationalId, String partyName) {
+        // Check if user has already voted
+        boolean hasVoted = currentElection.getCastVotes().stream()
+                .anyMatch(vote -> vote.getVoter().getNationalId().equals(nationalId));
+        
+        if (hasVoted) {
+            System.out.println("Error: User with National ID " + nationalId + " has already voted.");
+            return false;
+        }
+        
+        // Find or create party
+        Party party = currentElection.getPoliticalParties().stream()
+                .filter(p -> p.getName().equals(partyName))
+                .findFirst()
+                .orElseGet(() -> {
+                    Party newParty = new Party(partyName, partyName.substring(0, Math.min(3, partyName.length())).toUpperCase());
+                    currentElection.getPoliticalParties().add(newParty);
+                    return newParty;
+                });
+        
+        // Create a temporary user for voting (in real system, this would be the authenticated user)
+        User tempUser = new User("voter_" + nationalId, "", "", nationalId, false);
+        Vote newVote = new Vote(tempUser, party);
+        currentElection.addVote(newVote);
+        party.addVote();
+        
+        System.out.println("Vote cast successfully for " + partyName + " by user " + nationalId);
+        return true;
+    }
+
     public boolean castVote(User voter, Party party) {
         if (voter.hasVoted()) {
             System.out.println("Error: " + voter.getUsername() + " has already voted.");

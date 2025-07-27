@@ -38,6 +38,13 @@ public class AuthService {
         return true;
     }
 
+    public User authenticateUser(String username, String password) {
+        Optional<User> userOptional = users.stream()
+                                          .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
+                                          .findFirst();
+        return userOptional.orElse(null);
+    }
+
     public User login(String username, String password) {
         Optional<User> userOptional = users.stream()
                                           .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
