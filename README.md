@@ -1,6 +1,6 @@
 # PR Election Simulator - GUI with Face Recognition
 
-This project transforms a console-based election simulator into a modern JavaFX Graphical User Interface (GUI) application, incorporating real-time face capture and verification for enhanced security during user login and vote submission.
+This application is a modern election simulator developed using JavaFX for its graphical user interface, integrating real-time face capture and verification to ensure secure user authentication during login and while casting votes.
 
 ## Features
 
