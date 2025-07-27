@@ -230,12 +230,28 @@ public class MainGUI extends Application {
             javafx.application.Platform.runLater(() -> {
                 if (faceVerified) {
                     currentUser = user;
-                    showVotingScreen();
+                    // Check if user is admin
+                    if (currentUser.isAdmin()) {
+                        showAdminDashboard();
+                    } else {
+                        showVotingScreen();
+                    }
                 } else {
                     showAlert("Login Failed", "Face verification failed. Access denied.");
                 }
             });
         }).start();
+    }
+    
+    private void showAdminDashboard() {
+        try {
+            AdminDashboardGUI adminDashboard = new AdminDashboardGUI(authService, electionService);
+            Stage adminStage = new Stage();
+            adminDashboard.start(adminStage);
+            primaryStage.close(); // Close the main login window
+        } catch (Exception e) {
+            showAlert("Error", "Failed to open admin dashboard: " + e.getMessage());
+        }
     }
     
     private void showVotingScreen() {

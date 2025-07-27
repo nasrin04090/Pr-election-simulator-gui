@@ -136,5 +136,85 @@ public class ElectionService {
     public List<Vote> getAllVotes() {
         return currentElection.getCastVotes();
     }
+
+    // Party management methods for admin dashboard
+    public void addParty(Party party) {
+        if (party != null && !currentElection.getPoliticalParties().contains(party)) {
+            currentElection.getPoliticalParties().add(party);
+            System.out.println("Party " + party.getName() + " added successfully.");
+        } else {
+            System.out.println("Party already exists or is null.");
+        }
+    }
+
+    public void updateParty(Party updatedParty) {
+        List<Party> parties = currentElection.getPoliticalParties();
+        for (int i = 0; i < parties.size(); i++) {
+            Party existingParty = parties.get(i);
+            if (existingParty.equals(updatedParty)) {
+                // Update the existing party with new details
+                existingParty.setName(updatedParty.getName());
+                existingParty.setAbbreviation(updatedParty.getAbbreviation());
+                existingParty.setIconPath(updatedParty.getIconPath());
+                System.out.println("Party updated successfully.");
+                return;
+            }
+        }
+        System.out.println("Party not found for update.");
+    }
+
+    public void removeParty(Party party) {
+        if (currentElection.getPoliticalParties().remove(party)) {
+            // Also remove any votes for this party
+            currentElection.getCastVotes().removeIf(vote -> vote.getVotedParty().equals(party));
+            System.out.println("Party " + party.getName() + " removed successfully.");
+        } else {
+            System.out.println("Party not found for removal.");
+        }
+    }
+
+    public Party findPartyByName(String name) {
+        return currentElection.getPoliticalParties().stream()
+                .filter(party -> party.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Party findPartyByAbbreviation(String abbreviation) {
+        return currentElection.getPoliticalParties().stream()
+                .filter(party -> party.getAbbreviation().equalsIgnoreCase(abbreviation))
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Election configuration methods
+    public void setTotalSeats(int totalSeats) {
+        if (totalSeats > 0) {
+            currentElection.setTotalSeats(totalSeats);
+            System.out.println("Total seats updated to " + totalSeats);
+        } else {
+            System.out.println("Total seats must be a positive number.");
+        }
+    }
+
+    public void resetElection() {
+        currentElection.getCastVotes().clear();
+        currentElection.getPoliticalParties().forEach(party -> {
+            party.setVotes(0);
+            party.setSeats(0);
+        });
+        System.out.println("Election reset successfully.");
+    }
+
+    public void initializeDefaultParties() {
+        if (currentElection.getPoliticalParties().isEmpty()) {
+            // Add some default parties for demonstration
+            addParty(new Party("Democratic Party", "DEM"));
+            addParty(new Party("Republican Party", "REP"));
+            addParty(new Party("Independent Party", "IND"));
+            addParty(new Party("Green Party", "GRN"));
+            System.out.println("Default parties initialized.");
+        }
+    }
 }
 
