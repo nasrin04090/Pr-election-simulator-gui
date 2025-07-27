@@ -1,6 +1,6 @@
 package com.election.simulator.model;
 
-public class User {
+public class Voter {
     private String username;
     private String password;
     private String fullName;
@@ -8,7 +8,7 @@ public class User {
     private boolean isAdmin;
     private boolean hasVoted;
 
-    public User(String username, String password, String fullName, String nationalId, boolean isAdmin) {
+    public Voter(String username, String password, String fullName, String nationalId, boolean isAdmin) {
         this.username = username;
         this.password = password;
         this.fullName = fullName;
@@ -69,7 +69,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "Voter{" +
                "username='" + username + '\'' +
                ", fullName='" + fullName + '\'' +
                ", nationalId='" + nationalId + '\'' +

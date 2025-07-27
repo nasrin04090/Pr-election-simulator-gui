@@ -1,26 +1,26 @@
 package com.election.simulator.auth;
 
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class AuthService {
-    private List<User> users;
-    private User currentUser;
+    private List<Voter> voters;
+    private Voter currentVoter;
     private FaceRecognitionService faceRecognitionService;
 
     public AuthService() {
-        this.users = new ArrayList<>();
+        this.voters = new ArrayList<>();
         this.faceRecognitionService = new FaceRecognitionService();
-        // Add a default admin user for testing
-        this.users.add(new User("admin", "adminpass", "Administrator", "00000000000", true));
+        // Add a default admin voter for testing
+        this.voters.add(new Voter("admin", "adminpass", "Administrator", "00000000000", true));
     }
 
-    public boolean registerUser(String username, String password, String fullName, String nationalId) {
+    public boolean registerVoter(String username, String password, String fullName, String nationalId) {
         // Check if username or national ID already exists
-        if (users.stream().anyMatch(u -> u.getUsername().equals(username) || u.getNationalId().equals(nationalId))) {
+        if (voters.stream().anyMatch(v -> v.getUsername().equals(username) || v.getNationalId().equals(nationalId))) {
             System.out.println("Registration failed: Username or National ID already exists.");
             return false;
         }
@@ -32,36 +32,36 @@ public class AuthService {
             return false;
         }
         
-        User newUser = new User(username, password, fullName, nationalId, false);
-        users.add(newUser);
-        System.out.println("User registered successfully: " + username);
+        Voter newVoter = new Voter(username, password, fullName, nationalId, false);
+        voters.add(newVoter);
+        System.out.println("Voter registered successfully: " + username);
         return true;
     }
 
-    public User authenticateUser(String username, String password) {
-        Optional<User> userOptional = users.stream()
-                                          .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
+    public Voter authenticateVoter(String username, String password) {
+        Optional<Voter> voterOptional = voters.stream()
+                                          .filter(v -> v.getUsername().equals(username) && v.getPassword().equals(password))
                                           .findFirst();
-        return userOptional.orElse(null);
+        return voterOptional.orElse(null);
     }
 
-    public User login(String username, String password) {
-        Optional<User> userOptional = users.stream()
-                                          .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
+    public Voter login(String username, String password) {
+        Optional<Voter> voterOptional = voters.stream()
+                                          .filter(v -> v.getUsername().equals(username) && v.getPassword().equals(password))
                                           .findFirst();
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            // Perform face verification for non-admin users
-            if (!user.isAdmin()) {
+        if (voterOptional.isPresent()) {
+            Voter voter = voterOptional.get();
+            // Perform face verification for non-admin voters
+            if (!voter.isAdmin()) {
                 System.out.println("\nFace verification required for login...");
-                if (!faceRecognitionService.verifyFace(user.getNationalId())) {
+                if (!faceRecognitionService.verifyFace(voter.getNationalId())) {
                     System.out.println("Login failed: Face verification unsuccessful.");
                     return null;
                 }
             }
-            currentUser = user;
-            System.out.println("Login successful for user: " + username);
-            return currentUser;
+            currentVoter = voter;
+            System.out.println("Login successful for voter: " + username);
+            return currentVoter;
         } else {
             System.out.println("Login failed: Invalid username or password.");
             return null;
@@ -69,28 +69,28 @@ public class AuthService {
     }
 
     public void logout() {
-        currentUser = null;
-        System.out.println("User logged out.");
+        currentVoter = null;
+        System.out.println("Voter logged out.");
     }
 
-    public User getCurrentUser() {
-        return currentUser;
+    public Voter getCurrentVoter() {
+        return currentVoter;
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+    public List<Voter> getAllVoters() {
+        return new ArrayList<>(voters);
     }
 
-    public boolean deleteUser(String username) {
-        Optional<User> userToDelete = users.stream()
-                                          .filter(u -> u.getUsername().equals(username))
+    public boolean deleteVoter(String username) {
+        Optional<Voter> voterToDelete = voters.stream()
+                                          .filter(v -> v.getUsername().equals(username))
                                           .findFirst();
-        if (userToDelete.isPresent()) {
-            users.remove(userToDelete.get());
-            System.out.println("User " + username + " deleted successfully.");
+        if (voterToDelete.isPresent()) {
+            voters.remove(voterToDelete.get());
+            System.out.println("Voter " + username + " deleted successfully.");
             return true;
         } else {
-            System.out.println("User " + username + " not found.");
+            System.out.println("Voter " + username + " not found.");
             return false;
         }
     }

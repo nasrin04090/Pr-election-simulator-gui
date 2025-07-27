@@ -2,7 +2,7 @@ package com.election.simulator.service;
 
 import com.election.simulator.model.Election;
 import com.election.simulator.model.Party;
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 import com.election.simulator.model.Vote;
 
 import java.util.ArrayList;
@@ -47,17 +47,17 @@ public class ElectionService {
                     return newParty;
                 });
         
-        // Create a temporary user for voting (in real system, this would be the authenticated user)
-        User tempUser = new User("voter_" + nationalId, "", "", nationalId, false);
-        Vote newVote = new Vote(tempUser, party);
+        // Create a temporary voter for voting (in real system, this would be the authenticated voter)
+        Voter tempVoter = new Voter("voter_" + nationalId, "", "", nationalId, false);
+        Vote newVote = new Vote(tempVoter, party);
         currentElection.addVote(newVote);
         party.addVote();
         
-        System.out.println("Vote cast successfully for " + partyName + " by user " + nationalId);
+        System.out.println("Vote cast successfully for " + partyName + " by voter " + nationalId);
         return true;
     }
 
-    public boolean castVote(User voter, Party party) {
+    public boolean castVote(Voter voter, Party party) {
         if (voter.hasVoted()) {
             System.out.println("Error: " + voter.getUsername() + " has already voted.");
             return false;

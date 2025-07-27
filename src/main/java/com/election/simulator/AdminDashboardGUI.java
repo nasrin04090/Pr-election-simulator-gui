@@ -2,7 +2,7 @@ package com.election.simulator;
 
 import com.election.simulator.auth.AuthService;
 import com.election.simulator.model.Party;
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 import com.election.simulator.service.ElectionService;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -61,7 +61,7 @@ public class AdminDashboardGUI extends Application {
         primaryStage.setMaximized(true);
 
         // Check admin access
-        if (authService.getCurrentUser() == null || !authService.getCurrentUser().isAdmin()) {
+        if (authService.getCurrentVoter() == null || !authService.getCurrentVoter().isAdmin()) {
             showAlert("Access Denied", "Only administrators can access this dashboard.", Alert.AlertType.ERROR);
             primaryStage.close();
             return;
@@ -99,7 +99,7 @@ public class AdminDashboardGUI extends Application {
         Label titleLabel = new Label("Admin Dashboard");
         titleLabel.getStyleClass().add("header-title");
 
-        Label userLabel = new Label("Welcome, " + authService.getCurrentUser().getFullName());
+        Label userLabel = new Label("Welcome, " + authService.getCurrentVoter().getFullName());
         userLabel.getStyleClass().add("header-subtitle");
 
         Button logoutButton = new Button("Logout");
@@ -328,28 +328,28 @@ public class AdminDashboardGUI extends Application {
         VBox pane = new VBox(20);
         pane.getStyleClass().add("container");
 
-        Label title = new Label("User Management");
+        Label title = new Label("Voter Management");
         title.getStyleClass().add("title-label");
 
-        // User table
-        TableView<User> userTable = new TableView<>();
+        // Voter table
+        TableView<Voter> voterTable = new TableView<>();
 
-        TableColumn<User, String> usernameCol = new TableColumn<>("Username");
+        TableColumn<Voter, String> usernameCol = new TableColumn<>("Username");
         usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
 
-        TableColumn<User, String> fullNameCol = new TableColumn<>("Full Name");
+        TableColumn<Voter, String> fullNameCol = new TableColumn<>("Full Name");
         fullNameCol.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
-        TableColumn<User, String> nationalIdCol = new TableColumn<>("National ID");
+        TableColumn<Voter, String> nationalIdCol = new TableColumn<>("National ID");
         nationalIdCol.setCellValueFactory(new PropertyValueFactory<>("nationalId"));
 
-        TableColumn<User, Boolean> adminCol = new TableColumn<>("Admin");
+        TableColumn<Voter, Boolean> adminCol = new TableColumn<>("Admin");
         adminCol.setCellValueFactory(new PropertyValueFactory<>("admin"));
 
-        userTable.getColumns().addAll(usernameCol, fullNameCol, nationalIdCol, adminCol);
-        userTable.setItems(FXCollections.observableArrayList(authService.getAllUsers()));
+        voterTable.getColumns().addAll(usernameCol, fullNameCol, nationalIdCol, adminCol);
+        voterTable.setItems(FXCollections.observableArrayList(authService.getAllVoters()));
 
-        pane.getChildren().addAll(title, userTable);
+        pane.getChildren().addAll(title, voterTable);
         return pane;
     }
 

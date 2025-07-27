@@ -3,7 +3,7 @@ package com.election.simulator;
 import com.election.simulator.auth.AuthService;
 import com.election.simulator.admin.AdminDashboard;
 import com.election.simulator.service.ElectionService;
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 import com.election.simulator.model.Party;
 
 import java.util.List;
@@ -26,10 +26,10 @@ public class Main {
 
         System.out.println("PR Election Simulator (Core Functionality with Enhanced Face Recognition Simulation) Started!");
 
-        User currentUser = null;
+        Voter currentVoter = null;
 
         while (true) {
-            if (currentUser == null) {
+            if (currentVoter == null) {
                 System.out.println("\n--- Welcome! ---");
                 System.out.println("1. Register");
                 System.out.println("2. Login");
@@ -48,14 +48,14 @@ public class Main {
                         String regFullName = scanner.nextLine();
                         System.out.print("Enter national ID: ");
                         String regNationalId = scanner.nextLine();
-                        authService.registerUser(regUsername, regPassword, regFullName, regNationalId);
+                        authService.registerVoter(regUsername, regPassword, regFullName, regNationalId);
                         break;
                     case 2:
                         System.out.print("Enter username: ");
                         String loginUsername = scanner.nextLine();
                         System.out.print("Enter password: ");
                         String loginPassword = scanner.nextLine();
-                        currentUser = authService.login(loginUsername, loginPassword);
+                        currentVoter = authService.login(loginUsername, loginPassword);
                         break;
                     case 0:
                         System.out.println("Exiting application.");
@@ -65,14 +65,14 @@ public class Main {
                         System.out.println("Invalid choice. Please try again.");
                 }
             } else { // User is logged in
-                if (currentUser.isAdmin()) {
+                if (currentVoter.isAdmin()) {
                     AdminDashboard adminDashboard = new AdminDashboard(authService, electionService);
                     adminDashboard.displayAdminOptions();
-                    currentUser = authService.getCurrentUser(); // Update current user after admin actions
+                    currentVoter = authService.getCurrentVoter(); // Update current voter after admin actions
                 } else {
                     System.out.println("\n--- Voter Menu ---");
-                    System.out.println("Welcome, " + currentUser.getFullName() + "!");
-                    if (currentUser.hasVoted()) {
+                    System.out.println("Welcome, " + currentVoter.getFullName() + "!");
+                    if (currentVoter.hasVoted()) {
                         System.out.println("You have already cast your vote. Thank you!");
                     } else {
                         System.out.println("1. Cast Vote");
@@ -84,7 +84,7 @@ public class Main {
 
                     switch (choice) {
                         case 1:
-                            if (!currentUser.hasVoted()) {
+                            if (!currentVoter.hasVoted()) {
                                 System.out.println("\nAvailable Parties:");
                                 List<Party> availableParties = electionService.getParties();
                                 for (int i = 0; i < availableParties.size(); i++) {
@@ -94,7 +94,7 @@ public class Main {
                                 int partyChoice = scanner.nextInt();
                                 scanner.nextLine();
                                 if (partyChoice > 0 && partyChoice <= availableParties.size()) {
-                                    electionService.castVote(currentUser, availableParties.get(partyChoice - 1));
+                                    electionService.castVote(currentVoter, availableParties.get(partyChoice - 1));
                                 } else {
                                     System.out.println("Invalid party choice.");
                                 }
@@ -104,7 +104,7 @@ public class Main {
                             break;
                         case 0:
                             authService.logout();
-                            currentUser = null;
+                            currentVoter = null;
                             break;
                         default:
                             System.out.println("Invalid choice. Please try again.");

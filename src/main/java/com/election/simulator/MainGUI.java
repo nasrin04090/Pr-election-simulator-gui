@@ -11,7 +11,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import com.election.simulator.auth.AuthService;
 import com.election.simulator.auth.FaceRecognitionService;
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 import com.election.simulator.service.ElectionService;
 
 public class MainGUI extends Application {
@@ -19,7 +19,7 @@ public class MainGUI extends Application {
     private FaceRecognitionService faceService;
     private ElectionService electionService;
     private Stage primaryStage;
-    private User currentUser;
+    private Voter currentVoter;
 
     @Override
     public void start(Stage primaryStage) {
@@ -77,7 +77,7 @@ public class MainGUI extends Application {
         loginButton.setPrefWidth(250);
         loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         
-        Button registerButton = new Button("Register New User");
+        Button registerButton = new Button("Register New Voter");
         registerButton.setPrefWidth(250);
         registerButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         
@@ -104,7 +104,7 @@ public class MainGUI extends Application {
         root.setPadding(new Insets(30));
         root.setStyle("-fx-background-color: #f0f8ff;");
         
-        Label titleLabel = new Label("User Registration");
+        Label titleLabel = new Label("Voter Registration");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         titleLabel.setStyle("-fx-text-fill: #2c3e50;");
         
@@ -192,9 +192,9 @@ public class MainGUI extends Application {
                 return;
             }
             
-            boolean success = authService.registerUser(username, password, fullName, nationalId);
+            boolean success = authService.registerVoter(username, password, fullName, nationalId);
             if (success) {
-                showAlert("Registration Successful", "User registered successfully! You can now login.");
+                showAlert("Registration Successful", "Voter registered successfully! You can now login.");
                 showLoginScreen();
             } else {
                 statusLabel.setText("Registration failed. Username may already exist.");
@@ -216,8 +216,8 @@ public class MainGUI extends Application {
         }
         
         // First verify password
-        User user = authService.authenticateUser(username, password);
-        if (user == null) {
+        Voter voter = authService.authenticateVoter(username, password);
+        if (voter == null) {
             showAlert("Login Failed", "Invalid username or password");
             return;
         }
@@ -226,12 +226,12 @@ public class MainGUI extends Application {
         showAlert("Face Verification", "Please look at the camera for face verification");
         
         new Thread(() -> {
-            boolean faceVerified = faceService.verifyFace(user.getNationalId());
+            boolean faceVerified = faceService.verifyFace(voter.getNationalId());
             javafx.application.Platform.runLater(() -> {
                 if (faceVerified) {
-                    currentUser = user;
-                    // Check if user is admin
-                    if (currentUser.isAdmin()) {
+                    currentVoter = voter;
+                    // Check if voter is admin
+                    if (currentVoter.isAdmin()) {
                         showAdminDashboard();
                     } else {
                         showVotingScreen();
@@ -260,7 +260,7 @@ public class MainGUI extends Application {
         root.setPadding(new Insets(30));
         root.setStyle("-fx-background-color: #f0f8ff;");
         
-        Label welcomeLabel = new Label("Welcome, " + currentUser.getFullName());
+        Label welcomeLabel = new Label("Welcome, " + currentVoter.getFullName());
         welcomeLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         welcomeLabel.setStyle("-fx-text-fill: #2c3e50;");
         
@@ -306,10 +306,10 @@ public class MainGUI extends Application {
             showAlert("Face Verification", "Please look at the camera to verify your identity before casting vote");
             
             new Thread(() -> {
-                boolean faceVerified = faceService.verifyFace(currentUser.getNationalId());
+                boolean faceVerified = faceService.verifyFace(currentVoter.getNationalId());
                 javafx.application.Platform.runLater(() -> {
                     if (faceVerified) {
-                        boolean voteSuccess = electionService.castVote(currentUser.getNationalId(), selectedParty);
+                        boolean voteSuccess = electionService.castVote(currentVoter.getNationalId(), selectedParty);
                         if (voteSuccess) {
                             showAlert("Vote Cast", "Your vote for " + selectedParty + " has been recorded successfully!");
                             showLoginScreen(); // Return to login after voting
@@ -324,7 +324,7 @@ public class MainGUI extends Application {
         });
         
         logoutButton.setOnAction(e -> {
-            currentUser = null;
+            currentVoter = null;
             showLoginScreen();
         });
         

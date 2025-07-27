@@ -2,7 +2,7 @@ package com.election.simulator.admin;
 
 import com.election.simulator.auth.AuthService;
 import com.election.simulator.model.Party;
-import com.election.simulator.model.User;
+import com.election.simulator.model.Voter;
 import com.election.simulator.service.ElectionService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class AdminDashboard {
     }
 
     public void displayAdminOptions() {
-        if (authService.getCurrentUser() == null || !authService.getCurrentUser().isAdmin()) {
+        if (authService.getCurrentVoter() == null || !authService.getCurrentVoter().isAdmin()) {
             System.out.println("Access Denied: Only administrators can access this dashboard.");
             return;
         }
@@ -65,12 +65,12 @@ public class AdminDashboard {
     }
 
     private void manageUsers() {
-        System.out.println("\n--- User Management ---");
+        System.out.println("\n--- Voter Management ---");
         int choice;
         do {
-            System.out.println("1. View All Users");
-            System.out.println("2. Add New User");
-            System.out.println("3. Delete User");
+            System.out.println("1. View All Voters");
+            System.out.println("2. Add New Voter");
+            System.out.println("3. Delete Voter");
             System.out.println("0. Back to Admin Dashboard");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
@@ -95,14 +95,14 @@ public class AdminDashboard {
     }
 
     private void viewAllUsers() {
-        System.out.println("\n--- All Users ---");
-        List<User> users = authService.getAllUsers();
-        if (users.isEmpty()) {
-            System.out.println("No users registered.");
+        System.out.println("\n--- All Voters ---");
+        List<Voter> voters = authService.getAllVoters();
+        if (voters.isEmpty()) {
+            System.out.println("No voters registered.");
             return;
         }
-        for (User user : users) {
-            System.out.println(user);
+        for (Voter voter : voters) {
+            System.out.println(voter);
         }
     }
 
@@ -116,13 +116,13 @@ public class AdminDashboard {
         System.out.print("Enter national ID: ");
         String nationalId = scanner.nextLine();
 
-        authService.registerUser(username, password, fullName, nationalId);
+        authService.registerVoter(username, password, fullName, nationalId);
     }
 
     private void deleteUser() {
-        System.out.print("Enter username of user to delete: ");
+        System.out.print("Enter username of voter to delete: ");
         String username = scanner.nextLine();
-        authService.deleteUser(username);
+        authService.deleteVoter(username);
     }
 
     private void manageParties() {

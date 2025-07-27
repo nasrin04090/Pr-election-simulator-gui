@@ -3,18 +3,18 @@ package com.election.simulator.model;
 import java.time.LocalDateTime;
 
 public class Vote {
-    private User voter;
+    private Voter voter;
     private Party votedParty;
     private LocalDateTime timestamp;
 
-    public Vote(User voter, Party votedParty) {
+    public Vote(Voter voter, Party votedParty) {
         this.voter = voter;
         this.votedParty = votedParty;
         this.timestamp = LocalDateTime.now();
     }
 
     // Getters
-    public User getVoter() {
+    public Voter getVoter() {
         return voter;
     }
 
@@ -35,4 +35,5 @@ public class Vote {
                "}";
     }
 }
+
 

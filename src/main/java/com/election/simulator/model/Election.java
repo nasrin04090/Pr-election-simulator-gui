@@ -7,14 +7,14 @@ import java.util.HashMap;
 
 public class Election {
     private String electionName;
-    private List<User> registeredUsers;
+    private List<Voter> registeredVoters;
     private List<Party> politicalParties;
     private List<Vote> castVotes;
     private int totalSeats;
 
     public Election(String electionName, int totalSeats) {
         this.electionName = electionName;
-        this.registeredUsers = new ArrayList<>();
+        this.registeredVoters = new ArrayList<>();
         this.politicalParties = new ArrayList<>();
         this.castVotes = new ArrayList<>();
         this.totalSeats = totalSeats;
@@ -25,8 +25,8 @@ public class Election {
         return electionName;
     }
 
-    public List<User> getRegisteredUsers() {
-        return registeredUsers;
+    public List<Voter> getRegisteredVoters() {
+        return registeredVoters;
     }
 
     public List<Party> getPoliticalParties() {
@@ -46,8 +46,8 @@ public class Election {
         this.electionName = electionName;
     }
 
-    public void setRegisteredUsers(List<User> registeredUsers) {
-        this.registeredUsers = registeredUsers;
+    public void setRegisteredVoters(List<Voter> registeredVoters) {
+        this.registeredVoters = registeredVoters;
     }
 
     public void setPoliticalParties(List<Party> politicalParties) {
@@ -63,8 +63,8 @@ public class Election {
     }
 
     // Methods for managing election data
-    public void addUser(User user) {
-        this.registeredUsers.add(user);
+    public void addVoter(Voter voter) {
+        this.registeredVoters.add(voter);
     }
 
     public void addParty(Party party) {
@@ -96,10 +96,12 @@ public class Election {
         return "Election{" +
                "electionName=\'" + electionName + '\'' +
                ", totalSeats=" + totalSeats +
-               ", registeredUsersCount=" + registeredUsers.size() +
+               ", registeredVotersCount=" + registeredVoters.size() +
                ", politicalPartiesCount=" + politicalParties.size() +
                ", castVotesCount=" + castVotes.size() +
+               '\n' +
                '}';
     }
 }
+
 
