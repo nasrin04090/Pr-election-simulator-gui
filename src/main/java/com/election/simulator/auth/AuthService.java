@@ -52,7 +52,11 @@ public class AuthService {
         if (voterOptional.isPresent()) {
             Voter voter = voterOptional.get();
             // Perform face verification for non-admin voters
-            if (!voter.isAdmin()) {
+            if (voter.isAdmin()) {
+                currentVoter = voter;
+                System.out.println("Login successful for admin voter: " + username);
+                return currentVoter;
+            } else {
                 System.out.println("\nFace verification required for login...");
                 if (!faceRecognitionService.verifyFace(voter.getNationalId())) {
                     System.out.println("Login failed: Face verification unsuccessful.");
