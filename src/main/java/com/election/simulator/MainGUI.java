@@ -234,47 +234,71 @@ public class MainGUI extends Application {
             showAlert("Login Failed", "Invalid username or password");
             return;
         }
-        
-        // Then verify face
-        showAlert("Face Verification", "Please look at the camera for face verification");
-        
-        ImageView cameraView = new ImageView();
-        cameraView.setFitWidth(320);
-        cameraView.setFitHeight(240);
-        cameraView.setStyle("-fx-background-color: black;");
 
-        Stage cameraStage = new Stage();
-        cameraStage.setTitle("Face Verification");
-        VBox cameraRoot = new VBox(cameraView);
-        cameraRoot.setAlignment(Pos.CENTER);
-        Scene cameraScene = new Scene(cameraRoot);
-        cameraStage.setScene(cameraScene);
-        cameraStage.show();
+        currentVoter = voter;
 
-        new Thread(() -> {
-            boolean faceVerified = faceService.verifyFaceWithStream(voter.getNationalId(), cameraView);
-            javafx.application.Platform.runLater(() -> {
-                cameraStage.close();
-                if (faceVerified) {
-                    currentVoter = voter;
-                    // If the current voter is the initial admin and has just verified face, remove the temporary admin
-                    if (currentVoter.isAdmin() && currentVoter.getNationalId().equals("00000000000") && faceService.hasFaceData(currentVoter.getNationalId())) {
-                        authService.deleteVoter("admin"); // Remove the temporary admin account
-                        // Re-register the admin with the captured face data and as a permanent admin
-                        authService.registerVoter("admin", "adminpass", "Administrator", currentVoter.getNationalId(), true);
-                        showAlert("Admin Face Registered", "Your face has been successfully registered for the admin account.");
-                    }
-                    // Check if voter is admin
-                    if (currentVoter.isAdmin()) {
+        // If admin and no face data, go to admin dashboard and prompt for face registration
+        if (currentVoter.isAdmin() && !faceService.hasFaceData(currentVoter.getNationalId())) {
+            showAdminDashboard();
+            showAlert("Admin Face Registration", "Welcome, Admin! Please register your face for future secure logins.");
+            // You might want to add a specific screen or section in the admin dashboard for face registration
+            // For now, we'll just show the alert.
+        } else if (currentVoter.isAdmin() && faceService.hasFaceData(currentVoter.getNationalId())) {
+            // Admin with face data, proceed with face verification
+            showAlert("Face Verification", "Please look at the camera for face verification");
+
+            ImageView cameraView = new ImageView();
+            cameraView.setFitWidth(320);
+            cameraView.setFitHeight(240);
+            cameraView.setStyle("-fx-background-color: black;");
+
+            Stage cameraStage = new Stage();
+            cameraStage.setTitle("Face Verification");
+            VBox cameraRoot = new VBox(cameraView);
+            cameraRoot.setAlignment(Pos.CENTER);
+            Scene cameraScene = new Scene(cameraRoot);
+            cameraStage.setScene(cameraScene);
+            cameraStage.show();
+
+            new Thread(() -> {
+                boolean faceVerified = faceService.verifyFaceWithStream(voter.getNationalId(), cameraView);
+                javafx.application.Platform.runLater(() -> {
+                    cameraStage.close();
+                    if (faceVerified) {
                         showAdminDashboard();
                     } else {
-                        showVotingScreen();
+                        showAlert("Login Failed", "Face verification failed. Access denied.");
                     }
-                } else {
-                    showAlert("Login Failed", "Face verification failed. Access denied.");
-                }
-            });
-        }).start();
+                });
+            }).start();
+        } else { // Regular voter
+            showAlert("Face Verification", "Please look at the camera for face verification");
+
+            ImageView cameraView = new ImageView();
+            cameraView.setFitWidth(320);
+            cameraView.setFitHeight(240);
+            cameraView.setStyle("-fx-background-color: black;");
+
+            Stage cameraStage = new Stage();
+            cameraStage.setTitle("Face Verification");
+            VBox cameraRoot = new VBox(cameraView);
+            cameraRoot.setAlignment(Pos.CENTER);
+            Scene cameraScene = new Scene(cameraRoot);
+            cameraStage.setScene(cameraScene);
+            cameraStage.show();
+
+            new Thread(() -> {
+                boolean faceVerified = faceService.verifyFaceWithStream(voter.getNationalId(), cameraView);
+                javafx.application.Platform.runLater(() -> {
+                    cameraStage.close();
+                    if (faceVerified) {
+                        showVotingScreen();
+                    } else {
+                        showAlert("Login Failed", "Face verification failed. Access denied.");
+                    }
+                });
+            }).start();
+        }
     }
     
     private void showAdminDashboard() {

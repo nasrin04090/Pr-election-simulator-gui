@@ -62,20 +62,27 @@ public class AuthService {
                                           .findFirst();
         if (voterOptional.isPresent()) {
             Voter voter = voterOptional.get();
-            // Perform face verification for non-admin voters
+            // For admin voters, check if face data exists. If not, allow login without face verification.
+            // If face data exists, then require face verification.
             if (voter.isAdmin()) {
-                currentVoter = voter;
-                System.out.println("Login successful for admin voter: " + username);
-                return currentVoter;
+                if (faceRecognitionService.hasFaceData(voter.getNationalId())) {
+                    System.out.println("\nFace verification required for admin login...");
+                    if (!faceRecognitionService.verifyFace(voter.getNationalId())) {
+                        System.out.println("Login failed: Face verification unsuccessful for admin.");
+                        return null;
+                    }
+                } else {
+                    System.out.println("Admin login successful (no face data registered yet): " + username);
+                }
             } else {
-                System.out.println("\nFace verification required for login...");
+                System.out.println("\nFace verification required for voter login...");
                 if (!faceRecognitionService.verifyFace(voter.getNationalId())) {
                     System.out.println("Login failed: Face verification unsuccessful.");
                     return null;
                 }
             }
             currentVoter = voter;
-            System.out.println("Login successful for voter: " + username);
+            System.out.println("Login successful: " + username);
             return currentVoter;
         } else {
             System.out.println("Login failed: Invalid username or password.");
