@@ -14,11 +14,22 @@ public class AuthService {
     public AuthService() {
         this.voters = new ArrayList<>();
         this.faceRecognitionService = new FaceRecognitionService();
-        // Add a default admin voter for testing
-        this.voters.add(new Voter("admin", "adminpass", "Administrator", "00000000000", true));
     }
 
-    public boolean registerVoter(String username, String password, String fullName, String nationalId) {
+    public boolean registerVoter(String username, String password, String fullName, String nationalId, boolean isAdmin) {
+        // Check if username or national ID already exists
+        if (voters.stream().anyMatch(v -> v.getUsername().equals(username) || v.getNationalId().equals(nationalId))) {
+            System.out.println("Registration failed: Username or National ID already exists.");
+            return false;
+        }
+        
+        Voter newVoter = new Voter(username, password, fullName, nationalId, isAdmin);
+        voters.add(newVoter);
+        System.out.println("Voter registered successfully: " + username);
+        return true;
+    }
+
+    public boolean registerVoterWithFace(String username, String password, String fullName, String nationalId, boolean isAdmin) {
         // Check if username or national ID already exists
         if (voters.stream().anyMatch(v -> v.getUsername().equals(username) || v.getNationalId().equals(nationalId))) {
             System.out.println("Registration failed: Username or National ID already exists.");
@@ -32,7 +43,7 @@ public class AuthService {
             return false;
         }
         
-        Voter newVoter = new Voter(username, password, fullName, nationalId, false);
+        Voter newVoter = new Voter(username, password, fullName, nationalId, isAdmin);
         voters.add(newVoter);
         System.out.println("Voter registered successfully: " + username);
         return true;

@@ -116,7 +116,7 @@ public class AdminDashboard {
         System.out.print("Enter national ID: ");
         String nationalId = scanner.nextLine();
 
-        authService.registerVoter(username, password, fullName, nationalId);
+        authService.registerVoter(username, password, fullName, nationalId, false);
     }
 
     private void deleteUser() {

@@ -48,7 +48,7 @@ public class Main {
                         String regFullName = scanner.nextLine();
                         System.out.print("Enter national ID: ");
                         String regNationalId = scanner.nextLine();
-                        authService.registerVoter(regUsername, regPassword, regFullName, regNationalId);
+                        authService.registerVoterWithFace(regUsername, regPassword, regFullName, regNationalId, false);
                         break;
                     case 2:
                         System.out.print("Enter username: ");

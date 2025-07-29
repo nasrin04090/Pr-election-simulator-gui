@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -29,6 +30,12 @@ public class MainGUI extends Application {
         authService = new AuthService();
         faceService = new FaceRecognitionService();
         electionService = new ElectionService();
+        
+        // Check if an admin voter exists, if not, create a temporary one
+        if (authService.getAllVoters().stream().noneMatch(Voter::isAdmin)) {
+            authService.registerVoter("admin", "adminpass", "Administrator", "00000000000", true);
+            showAlert("Initial Admin Account Created", "A temporary admin account (username: admin, password: adminpass) has been created. Please log in and register your face.");
+        }
         
         primaryStage.setTitle("PR Election Simulator - Secure Voting System");
         primaryStage.setWidth(800);
@@ -124,6 +131,11 @@ public class MainGUI extends Application {
         TextField nationalIdField = new TextField();
         nationalIdField.setPromptText("National ID");
         
+        ImageView cameraView = new ImageView();
+        cameraView.setFitWidth(320);
+        cameraView.setFitHeight(240);
+        cameraView.setStyle("-fx-background-color: black;");
+        
         Button captureButton = new Button("Capture Face");
         captureButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         
@@ -145,10 +157,11 @@ public class MainGUI extends Application {
         regForm.add(fullNameField, 1, 2);
         regForm.add(new Label("National ID:"), 0, 3);
         regForm.add(nationalIdField, 1, 3);
-        regForm.add(captureButton, 0, 4, 2, 1);
-        regForm.add(statusLabel, 0, 5, 2, 1);
-        regForm.add(registerButton, 0, 6, 2, 1);
-        regForm.add(backButton, 0, 7, 2, 1);
+        regForm.add(cameraView, 0, 4, 2, 1); // Add camera view
+        regForm.add(captureButton, 0, 5, 2, 1);
+        regForm.add(statusLabel, 0, 6, 2, 1);
+        regForm.add(registerButton, 0, 7, 2, 1);
+        regForm.add(backButton, 0, 8, 2, 1);
         
         final boolean[] faceCaptured = {false};
         
@@ -161,7 +174,7 @@ public class MainGUI extends Application {
             statusLabel.setText("Starting face capture...");
             // Run face capture in background thread
             new Thread(() -> {
-                boolean success = faceService.captureAndStoreFace(nationalIdField.getText().trim());
+                boolean success = faceService.captureAndStoreFaceWithStream(nationalIdField.getText().trim(), cameraView);
                 javafx.application.Platform.runLater(() -> {
                     if (success) {
                         statusLabel.setText("Face captured successfully!");
@@ -192,7 +205,7 @@ public class MainGUI extends Application {
                 return;
             }
             
-            boolean success = authService.registerVoter(username, password, fullName, nationalId);
+            boolean success = authService.registerVoterWithFace(username, password, fullName, nationalId, false);
             if (success) {
                 showAlert("Registration Successful", "Voter registered successfully! You can now login.");
                 showLoginScreen();
@@ -225,11 +238,32 @@ public class MainGUI extends Application {
         // Then verify face
         showAlert("Face Verification", "Please look at the camera for face verification");
         
+        ImageView cameraView = new ImageView();
+        cameraView.setFitWidth(320);
+        cameraView.setFitHeight(240);
+        cameraView.setStyle("-fx-background-color: black;");
+
+        Stage cameraStage = new Stage();
+        cameraStage.setTitle("Face Verification");
+        VBox cameraRoot = new VBox(cameraView);
+        cameraRoot.setAlignment(Pos.CENTER);
+        Scene cameraScene = new Scene(cameraRoot);
+        cameraStage.setScene(cameraScene);
+        cameraStage.show();
+
         new Thread(() -> {
-            boolean faceVerified = faceService.verifyFace(voter.getNationalId());
+            boolean faceVerified = faceService.verifyFaceWithStream(voter.getNationalId(), cameraView);
             javafx.application.Platform.runLater(() -> {
+                cameraStage.close();
                 if (faceVerified) {
                     currentVoter = voter;
+                    // If the current voter is the initial admin and has just verified face, remove the temporary admin
+                    if (currentVoter.isAdmin() && currentVoter.getNationalId().equals("00000000000") && faceService.hasFaceData(currentVoter.getNationalId())) {
+                        authService.deleteVoter("admin"); // Remove the temporary admin account
+                        // Re-register the admin with the captured face data and as a permanent admin
+                        authService.registerVoter("admin", "adminpass", "Administrator", currentVoter.getNationalId(), true);
+                        showAlert("Admin Face Registered", "Your face has been successfully registered for the admin account.");
+                    }
                     // Check if voter is admin
                     if (currentVoter.isAdmin()) {
                         showAdminDashboard();
@@ -305,9 +339,23 @@ public class MainGUI extends Application {
             
             showAlert("Face Verification", "Please look at the camera to verify your identity before casting vote");
             
+            ImageView cameraView = new ImageView();
+            cameraView.setFitWidth(320);
+            cameraView.setFitHeight(240);
+            cameraView.setStyle("-fx-background-color: black;");
+
+            Stage cameraStage = new Stage();
+            cameraStage.setTitle("Face Verification");
+            VBox cameraRoot = new VBox(cameraView);
+            cameraRoot.setAlignment(Pos.CENTER);
+            Scene cameraScene = new Scene(cameraRoot);
+            cameraStage.setScene(cameraScene);
+            cameraStage.show();
+            
             new Thread(() -> {
-                boolean faceVerified = faceService.verifyFace(currentVoter.getNationalId());
+                boolean faceVerified = faceService.verifyFaceWithStream(currentVoter.getNationalId(), cameraView);
                 javafx.application.Platform.runLater(() -> {
+                    cameraStage.close();
                     if (faceVerified) {
                         boolean voteSuccess = electionService.castVote(currentVoter.getNationalId(), selectedParty);
                         if (voteSuccess) {
